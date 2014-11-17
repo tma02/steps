@@ -19,7 +19,21 @@ document.addEventListener("DOMContentLoaded", function(event) {
 });
 
 function registerEvents() {
-
+	player.bind('Moved', function () {
+		if (player.y - player.h > 350) {
+			player.y = -50;
+		}
+		if (player.x + player.w > 500) {
+			player.x = 500 - player.w;
+		}
+		else if (player.x < 0) {
+			player.x = 0;
+		}
+		var hitData = player.hit('Platform');
+		if (hitData && player.steps != 0 && hitData[0].obj.step < player.steps) {
+			player.x += 2;
+		}
+	});
 }
 
 function routeGen(step) {
@@ -44,19 +58,10 @@ function gameCycle() {
 		if (lines.length < 6) {
 			routeGen(lines[lines.length - 1].step + 1);
 		}
-		if (player.y - player.h > 350) {
-			player.y = -50;
-		}
-		if (player.x + player.w > 500) {
-			player.x = 500 - player.w;
-		}
-		else if (player.x < 0) {
-			player.x = 0;
-		}
 		var hitData = player.hit('Platform');
 		if (hitData) {
 			player.y -= 0.25;
-			player.steps = hitData[0].obj.step;
+			player.steps = hitData[hitData.length - 1].obj.step;
 			score.text("Steps taken: " + player.steps)
 		}
 	}
