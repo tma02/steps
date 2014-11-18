@@ -31,6 +31,10 @@ var acInfo = {
 		title: 'Raise the Roof',
 		desc: 'Touch the ceiling.'
 	},
+	step100: {
+		title: 'The Beginning of the End',
+		desc: 'Take 100 steps.'
+	},
 	step500: {
 		title: 'Having Fun?',
 		desc: 'Take 500 steps.'
@@ -163,6 +167,7 @@ function routeGen(step) {
 		xOffset = lastObj.x + lastObj.w;
 	}
 	lines.push(Crafty.e('2D, DOM, Color, Platform').attr({x: xOffset, y: 250, w: 100, h: 250, step: step}).color('#2c3e50'));
+	//TODO: powerup gen
 }
 
 function gameCycle() {
@@ -191,6 +196,9 @@ function gameCycle() {
 				}
 				player.stepJumpCount = 0;
 				acGet('differentBlock');
+				if (player.steps == 100) {
+					acGet('step100');
+				}
 				if (player.steps == 500) {
 					acGet('step500');
 				}
