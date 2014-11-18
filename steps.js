@@ -196,17 +196,17 @@ function gameCycle() {
 				}
 				player.stepJumpCount = 0;
 				acGet('differentBlock');
-				if (player.steps == 100) {
-					acGet('step100');
+				if (player.steps >= 2000) {
+					acGet('step2000');
 				}
-				if (player.steps == 500) {
-					acGet('step500');
-				}
-				if (player.steps == 1000) {
+				else if (player.steps >= 1000) {
 					acGet('step1000');
 				}
-				if (player.steps == 2000) {
-					acGet('step2000');
+				else if (player.steps >= 500) {
+					acGet('step500');
+				}
+				else if (player.steps >= 100) {
+					acGet('step100');
 				}
 			}
 			else if (player.steps != 0 && player.stepJump == hitData[hitData.length - 1].obj.step && hitData[hitData.length - 1].obj.step == player.steps) {
