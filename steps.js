@@ -50,7 +50,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
 				if (!this._falling && e.key === Crafty.keys.W) {
 					this._up = true;
 					if (!Crafty.storage('steps-ac').jump) {
-						Crafty.storage('steps-ac').jump = true;
+						var newAcObj = Crafty.storage('steps-ac');
+						newAcObj.jump = true;
+						Crafty.storage('steps-ac', newAcObj);
 						popup('');
 					}
 				}
@@ -67,14 +69,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	run = true;
 	setInterval(gameCycle, 9);
 });
-
-window.addEventListener("keydown", function(e) {
-		// space and arrow keys
-		if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
-				e.preventDefault();
-				return false;
-		}
-}, false);
 
 function registerEvents() {
 	player.bind('Moved', function () {
