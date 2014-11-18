@@ -1,3 +1,50 @@
+var acInfo = {
+	jump: {
+		title: 'Jump',
+		desc: 'It can only get easier, right?'
+	}, 
+	getAc: {
+		title: 'Achievement Get',
+		desc: 'Another one for the display.'
+	},
+	moveLeft: {
+		title: 'Move Left',
+		desc: 'To the left, to the left.'
+	},
+	moveRight: {
+		title: 'Move Right',
+		desc: 'DDDDDDDDDDDDD'
+	},
+	sameBlock: {
+		title: 'The Same Step',
+		desc: 'Seems a little counter-productive.'
+	},
+	sameBlock8: {
+		title: '8 Ball',
+		desc: 'Ask again later.'
+	},
+	differentBlock: {
+		title: 'A New Step',
+		desc: 'Finally, a change in scenery. Oh wait.'
+	},
+	touchCeil: {
+		title: 'Raise the Roof',
+		desc: 'Touch the ceiling.'
+	},
+	step500: {
+		title: 'Having Fun?',
+		desc: 'Take 500 steps.'
+	},
+	step1000: {
+		title: '0x03E8',
+		desc: 'That\'s a lot of steps.'
+	},
+	step2000: {
+		title: 'Snooze',
+		desc: 'Are you still awake?'
+	}
+}
+
 var run = false;
 var player;
 var lines = [];
@@ -14,7 +61,11 @@ document.addEventListener("DOMContentLoaded", function(event) {
 			moveRight: false,
 			sameBlock: false,
 			sameBlock8: false,
-			differentBlock: false
+			differentBlock: false,
+			touchCeil: false,
+			step500: false,
+			step1000: false,
+			step2000: false
 		});
 	}
 	if (Crafty.storage('steps-hs') === null) {
@@ -50,10 +101,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 				if (!this._falling && e.key === Crafty.keys.W) {
 					this._up = true;
 					if (!Crafty.storage('steps-ac').jump) {
-						var newAcObj = Crafty.storage('steps-ac');
-						newAcObj.jump = true;
-						Crafty.storage('steps-ac', newAcObj);
-						popup('');
+						acGet('jump');
 					}
 				}
 			});
@@ -128,27 +176,45 @@ function gameCycle() {
 			}
 		}
 		if (popups.length >= 1) {
-			if (popups[0].x > 300 - (popups[0].w / 2)) {
-				popups[0].x += 8.5;
+			if (popups[0].bg.x > 300 - (popups[0].bg.w / 2)) {
+				popups[0].bg.x += 8.5;
 			}
-			else if (popups[0].x > 200 - (popups[0].w / 2)) {
-				popups[0].x += 0.3;
+			else if (popups[0].bg.x > 200 - (popups[0].bg.w / 2)) {
+				popups[0].bg.x += 0.3;
 			}
 			else {
-				popups[0].x += 8.5;
+				popups[0].bg.x += 8.5;
 			}
-			if (popups[0].x > 500) {
-				popups[0].destroy();
+			popups[0].text.x = popups[0].bg.x;
+			if (popups[0].bg.x > 500) {
+				popups[0].bg.destroy();
+				popups[0].text.destroy();
 				popups.shift();
 			}
 		}
 	}
 }
 
-function acPopup() {
-	popup();
+function acGet(name) {
+	if (acInfo[name] !== null) {
+		var infoObj = acInfo[name];
+		var saveObj = Crafty.storage('steps-ac');
+		saveObj[name] = true;
+		Crafty.storage('steps-ac', saveObj);
+		acPopup(infoObj);
+	}
+	else {
+		console.log('Tried to get invalid achievement: ' + name);
+	}
 }
 
-function popup() {
-	popups.push(Crafty.e('2D, DOM, Color').attr({x: -100, y: 300, w: 100, h: 25, z: popups.length + 100}).color('#2ecc71'));
+function acPopup(infoObj) {
+	popup('Achievement Unlocked<br/>' + infoObj.title + '<br/>' + infoObj.desc);
+}
+
+function popup(text) {
+	popups.push({
+		bg: Crafty.e('2D, DOM, Color').attr({x: -100, y: 275, w: 200, h: 50, z: popups.length * 2 + 100}).color('#2ecc71'),
+		text: Crafty.e("2D, DOM, Text").attr({x: -100, y: 275, w: 200, h: 50, z: popups.length * 2 + 101}).text(text).textFont('size', '12px').textColor('#eeeeee')
+	});
 }
