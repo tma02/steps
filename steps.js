@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 	}
 	document.getElementById('hs').innerHTML = 'Highscore: ' + Crafty.storage('steps-hs');
 	Crafty.c('Platform', {});
-	Crafty.c('WASDTwoway', {
+	Crafty.c('CustomTwoway', {
 		_speed: 3,
 		_up: false,
 		init: function () {
@@ -85,9 +85,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
 				A: 180
 			});
 			if (speed) this._speed = speed;
-			if (arguments.length < 2){
+			if (arguments.length < 2) {
 				this._jumpSpeed = this._speed * 2;
-			} else{
+			} else {
 				this._jumpSpeed = jump;
 			}
 			this.bind("EnterFrame", function () {
@@ -100,16 +100,25 @@ document.addEventListener("DOMContentLoaded", function(event) {
 			}).bind("KeyDown", function (e) {
 				if (!this._falling && e.key === Crafty.keys.W) {
 					this._up = true;
-					if (!Crafty.storage('steps-ac').jump) {
-						acGet('jump');
+					if (this.stepJump == this.steps && this.stepJumpCount % 2 == 0) {
+						this.stepJumpCount++;
+						console.log(this.stepJumpCount);
+						if (this.stepJumpCount >= 13) {
+							acGet('sameBlock8');
+							this.stepJumpCount = 0;
+						}
 					}
+					this.stepJump = this.steps;
+					acGet('jump');
 				}
 			});
 			return this;
 		}
 	});
-	player = Crafty.e('2D, DOM, Color, Gravity, WASDTwoway, Collision, Keyboard').attr({x: 20, y: 20, w: 25, h: 50}).color('#ecf0f1').gravity('Platform').twoway(2);
+	player = Crafty.e('2D, DOM, Color, Gravity, CustomTwoway, Collision, Keyboard').attr({x: 20, y: 20, w: 25, h: 50}).color('#ecf0f1').gravity('Platform').twoway(2);
 	player.steps = 0;
+	player.stepJump = 0;
+	player.stepJumpCount = 0;
 	for (var i = 0; i < 6; i++) {
 		routeGen(0);
 	}
@@ -119,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 });
 
 function registerEvents() {
-	player.bind('Moved', function () {
+	player.bind('Moved', function (oldPos) {
 		//clip platforms and viewport
 		if (player.y - player.h > 350) {
 			player.y = -50;
@@ -134,8 +143,15 @@ function registerEvents() {
 		if (hitData && player.steps != 0 && hitData[0].obj.step < player.steps) {
 			player.x += 2;
 		}
+		//achievement triggers
 		if (player.y < 0) {
-			console.log('You touched the ceiling!');
+			acGet('touchCeil');
+		}
+		if (oldPos.x > player.x) {
+			acGet('moveLeft');
+		}
+		else if (oldPos.x < player.x) {
+			acGet('moveRight');
 		}
 	});
 }
@@ -173,6 +189,23 @@ function gameCycle() {
 					Crafty.storage('steps-hs', player.steps);
 					document.getElementById('hs').innerHTML = 'Highscore: ' + Crafty.storage('steps-hs');
 				}
+				player.stepJumpCount = 0;
+				acGet('differentBlock');
+				if (player.steps == 500) {
+					acGet('step500');
+				}
+				if (player.steps == 1000) {
+					acGet('step1000');
+				}
+				if (player.steps == 2000) {
+					acGet('step2000');
+				}
+			}
+			else if (player.steps != 0 && player.stepJump == hitData[hitData.length - 1].obj.step && hitData[hitData.length - 1].obj.step == player.steps) {
+				if (player.stepJumpCount % 2 == 1) {
+					player.stepJumpCount++;
+					acGet('sameBlock');
+				}
 			}
 		}
 		if (popups.length >= 1) {
@@ -197,11 +230,15 @@ function gameCycle() {
 
 function acGet(name) {
 	if (acInfo[name] !== null) {
-		var infoObj = acInfo[name];
 		var saveObj = Crafty.storage('steps-ac');
+		if (saveObj[name]) {
+			return;
+		}
+		var infoObj = acInfo[name];
 		saveObj[name] = true;
 		Crafty.storage('steps-ac', saveObj);
 		acPopup(infoObj);
+		acGet('getAc');
 	}
 	else {
 		console.log('Tried to get invalid achievement: ' + name);
@@ -214,7 +251,7 @@ function acPopup(infoObj) {
 
 function popup(text) {
 	popups.push({
-		bg: Crafty.e('2D, DOM, Color').attr({x: -100, y: 275, w: 200, h: 50, z: popups.length * 2 + 100}).color('#2ecc71'),
-		text: Crafty.e("2D, DOM, Text").attr({x: -100, y: 275, w: 200, h: 50, z: popups.length * 2 + 101}).text(text).textFont('size', '12px').textColor('#eeeeee')
+		bg: Crafty.e('2D, DOM, Color').attr({x: -250, y: 275, w: 250, h: 50, z: popups.length * 2 + 100}).color('#7f8c8d'),
+		text: Crafty.e("2D, DOM, Text").attr({x: -250, y: 277, w: 250, h: 45, z: popups.length * 2 + 101}).text(text).textFont('size', '12px').textColor('#2c3e50')
 	});
 }
